@@ -1,0 +1,7 @@
+<h3>공백까지 count :</h3> 
+{{text}} : {{ text|length }}글자
+<br>
+<h3>공백을 빼고 count :</h3>
+{{ text|cut:" " }} : {{ text|cut:" "|length }}글자
+<h3>단어만 count : </h3>
+{{ text|wordcount }}개
