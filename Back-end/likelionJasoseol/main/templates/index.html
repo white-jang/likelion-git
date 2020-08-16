@@ -30,29 +30,31 @@
         <p>자기소개서 작성</p>
     </div>
 
-    <a href="{% url 'my_index' %}">
-        <button>내 자기소개서만 보기</button>
-    </a>
-    <a href="{% url 'index' %}">
-        <button>모든 자기소개서 보기</button>
-    </a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'my_index' %}">
+            <button>내 자기소개서만 보기</button>
+        </a>
+        <a href="{% url 'index' %}">
+            <button>모든 자기소개서 보기</button>
+        </a>
 
-    <br>
-    <!-- 지금까지 작성된 자소서 띄워주는 부분 -->
-    {% for jss in all_jss %}
-    <a href="{% url 'detail' jss.id %}"> <!--url을 걸어주면서 동시에 jss_id 전송-->
-        <div class="all_jss">
-            <p>{{ jss.author }}</p>
+        <br>
+        <!-- 지금까지 작성된 자소서 띄워주는 부분 -->
+        {% for jss in all_jss %}
+        <a href="{% url 'detail' jss.id %}">
+            <!--url을 걸어주면서 동시에 jss_id 전송-->
+            <div class="all_jss">
+                <p>{{ jss.author }}</p>
 
-            <p>{{ jss.title }}</p>
+                <p>{{ jss.title }}</p>
 
-            <p>{{ jss.content }}</p>
+                <p>{{ jss.content }}</p>
 
-            <p>{{ jss.updated_at|date:"Y년m월d일" }}</p>
-        </div>
-    </a>
-    {% endfor %}
-
+                <p>{{ jss.updated_at|date:"Y년m월d일" }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    {% endif %}
 </body>
 
 </html>

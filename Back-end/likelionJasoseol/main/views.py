@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import JssForm
-from .models import Jasoseol
+from .forms import JssForm, CommentForm
+from .models import Jasoseol, Comment
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required # 데코레이터
@@ -14,7 +14,6 @@ def my_index(request):
     my_jss = Jasoseol.objects.filter(author=request.user)
     # 자소설 오브젝트들 중에서 author 값이 현재 유저인 값만 전부 가져오기
     return render(request, 'index.html', {'all_jss' : my_jss})
-
 
 @login_required(login_url='/login/')
 def create(request):
@@ -43,7 +42,8 @@ def detail(request, jss_id):
     # except:
     #    raise Http404 # 오브젝트가 없을 때 띄워주기 (get_object_or_404와 같음)
     my_jss = get_object_or_404(Jasoseol, pk=jss_id)
-    return render(request, 'detail.html', {'my_jss' : my_jss})
+    comment_form = CommentForm()
+    return render(request, 'detail.html', {'my_jss' : my_jss}, {'comment_form' : comment_form})
 
 def delete(request, jss_id):
     my_jss = Jasoseol.objects.get(pk=jss_id)
@@ -55,7 +55,7 @@ def delete(request, jss_id):
 
 def update(request, jss_id):
     my_jss = Jasoseol.objects.get(pk=jss_id)
-    jss_form = Jssform(instance=my_jss)
+    jss_form = JssForm(instance=my_jss)
 
     if request.method == "POST":
         updated_form = JssForm(request.POST, instance='my_jss') # 값을 덮어쓰기 위해 instance 정해주기
@@ -65,3 +65,21 @@ def update(request, jss_id):
             return redirect('index')
 
     return render(request, 'create.html', {'jss_form' : jss_form})
+
+def create_comment(request, jss_id):
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        temp_form = comment_form.save(commit=False)
+        temp_form.author = request.user
+        temp_form.jasoseol = Jasoseol.objects.get(pk=jss_id)
+        temp_form.save()
+        return redirect('detail', jss_id)
+
+def delete_comment(request, jss_id, comment_id):
+    my_comment = Comment.objects.get(pk=comment_id)
+    if request.user == my_comment.author:
+        my_comment.delete()
+        return redirect('detail', jss_id)
+
+    else:
+        raise PermissionDenied
